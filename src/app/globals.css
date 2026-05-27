@@ -1,26 +1,79 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ── Custom keyframes ────────────────────────────────────────────── */
+@keyframes fadeInScale {
+  0%   { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  /* ── Breakpoints (replaces Tailwind's default sm: 640px) ────────── */
+  --breakpoint-sm: 768px;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+  /* ── Brand & semantic color palette ─────────────────────────────── */
+  --color-navy:       #003366;
+  --color-navy2:      #4169E1;
+  --color-navy3:      #6495ED;
+  --color-lightnavy:  #99CCFF;
+  --color-red:        #FF6347;
+  --color-primary:    #003366;
+  --color-secondary:  #4169E1;
+  --color-accent:     #6495ED;
+  --color-surface:    #99CCFF;
+  --color-danger:     #FF6347;
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* ── Font families (CSS vars set by next/font/local in layout) ───── */
+  --font-nanumgothic_regular:    var(--font-nanumgothic-regular), sans-serif;
+  --font-nanumgothic_bold:       var(--font-nanumgothic-bold), sans-serif;
+  --font-nanumgothic_extrabold:  var(--font-nanumgothic-extrabold), sans-serif;
+
+  /* ── Fluid font-size scale ───────────────────────────────────────── */
+  --text-ui-caption:                    1rem;
+  --text-ui-caption--line-height:       1.5rem;
+  --text-ui-sm:                         1.5rem;
+  --text-ui-sm--line-height:            2rem;
+  --text-ui-md:                         2rem;
+  --text-ui-md--line-height:            2.5rem;
+  --text-ui-lg:                         2.3rem;
+  --text-ui-lg--line-height:            3rem;
+  --text-ui-xl:                         3.2rem;
+  --text-ui-xl--line-height:            4rem;
+  --text-ui-mega:                       10rem;
+  --text-ui-mega--line-height:          1;
+
+  /* ── Animations ──────────────────────────────────────────────────── */
+  --animate-fade-in-scale: fadeInScale 0.15s ease-out forwards;
+
+  /* ── Custom widths (w-*) ─────────────────────────────────────────── */
+  --width-content:      100rem;
+  --width-logo-title:   14.4rem;
+  --width-logo-hero:    27.3rem;
+  --width-form-sm:      30rem;
+  --width-form-md:      35rem;
+  --width-form-lg:      47rem;
+  --width-form-xl:      49rem;
+  --width-form-2xl:     64rem;
+  --width-calendar:     50rem;
+  --width-soon:         40rem;
+
+  /* ── Custom heights (h-*) ────────────────────────────────────────── */
+  --height-header:        8.6rem;
+  --height-header-sm:     35rem;
+  --height-logo-title:    3.2rem;
+  --height-nav-item:      3.4rem;
+  --height-logo-hero:     27.3rem;
+  --height-landing:       120rem;
+  --height-landing-sm:    140rem;
+  --height-coming-soon:   50rem;
+  --height-not-found:     40rem;
+  --height-page-loading:  20rem;
+  --height-calendar:      50rem;
+  --height-soon:          30rem;
+
+  /* ── Custom min-heights (min-h-*) ────────────────────────────────── */
+  --min-height-zone:        16rem;
+  --min-height-memo-panel:  59rem;
+
+  /* ── Custom max-widths (max-w-*) ─────────────────────────────────── */
+  --max-width-content: 100rem;
 }
