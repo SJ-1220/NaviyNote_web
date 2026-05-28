@@ -1,23 +1,23 @@
 import { updateTodo } from '@/lib/api/todoApi'
 import { DayCellMountArg, EventChangeArg, EventInput } from '@fullcalendar/core'
-import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
 import { useDrop } from 'react-dnd'
 import { toast } from 'sonner'
 import { Todo } from '../types/todo'
+import { useAuth } from '@/context/AuthContext'
 
 export const useCalendar = (
   todos: Todo[],
   setTodos: (todos: Todo[]) => void
 ) => {
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const [events, setEvents] = useState<EventInput[]>([])
   const calendarAllDayRef = useRef<HTMLTableCellElement[]>([])
   const calendarDropRef = useRef<HTMLDivElement>(null)
 
   // Todo를 캘린더에 드롭했을 때 해당 todo의 날짜를 업데이트하는 함수
   const handleDrop = async (calendarDroppedDate: string, todoId: string) => {
-    if (!todoId || !session?.user?.email) return
+    if (!todoId || !user?.email) return
     try {
       const calendarCorrectedDate = new Date(calendarDroppedDate)
       calendarCorrectedDate.setDate(calendarCorrectedDate.getDate() + 1)
@@ -25,7 +25,7 @@ export const useCalendar = (
       await updateTodo(
         todoId,
         { date: calendarCorrectedDate.toISOString().split('T')[0] },
-        session.user.email
+        user.email
       )
       const newTodos = todos.map((todo: Todo) =>
         todo.id === todoId
@@ -95,11 +95,11 @@ export const useCalendar = (
 
   const handleEventDrop = async (eventDropInfo: EventChangeArg) => {
     const todoId = eventDropInfo.event.id
-    if (!todoId || !session?.user?.email) return
+    if (!todoId || !user?.email) return
 
     const updatedDate = eventDropInfo.event.startStr
     try {
-      await updateTodo(todoId, { date: updatedDate }, session.user.email)
+      await updateTodo(todoId, { date: updatedDate }, user.email)
       const newTodos = todos.map((todo: Todo) =>
         todo.id === todoId ? { ...todo, date: updatedDate } : todo
       )

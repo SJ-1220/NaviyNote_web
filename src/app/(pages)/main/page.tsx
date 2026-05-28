@@ -1,26 +1,26 @@
 'use client'
 import LoadingPage from '@/components/Loading'
 import Main from '@/components/Main/Main'
-import { useSession } from 'next-auth/react'
+import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 export default function MainPage() {
-  const { data: session, status } = useSession()
+  const { status } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
     if (status === 'loading') return
-    if (!session || !session.user) {
+    if (status === 'unauthenticated') {
       router.push('/')
     }
-  }, [session, status, router])
+  }, [status, router])
 
   if (status === 'loading') {
     return <LoadingPage />
   }
 
-  if (!session || !session.user) {
+  if (status === 'unauthenticated') {
     return null
   }
 

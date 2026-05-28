@@ -5,7 +5,6 @@ import {
   fetchTodoWithMemo,
   updateTodo,
 } from '@/lib/api/todoApi'
-import { useSession } from 'next-auth/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -13,10 +12,11 @@ import useTodoStore from '../store/todoStore'
 import { Memo } from '../types/memo'
 import { Todo, TodoWithMemo } from '../types/todo'
 import { useScrollLock } from './useScrollLock'
+import { useAuth } from '@/context/AuthContext'
 
 export const useTodoModal = () => {
   const { todoId } = useParams()
-  const { data: session } = useSession()
+  const { user }=useAuth()
   const router = useRouter()
   const unlock = useScrollLock()
   const [loading, setLoading] = useState(true)
@@ -42,9 +42,9 @@ export const useTodoModal = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (todolist.length === 0 && session?.user?.email) {
+      if (todolist.length === 0 && user?.email) {
         try {
-          const fetchModalTodos = await fetchTodos(session.user.email)
+          const fetchModalTodos = await fetchTodos(user.email)
           setTodosStore(fetchModalTodos)
         } catch {
           toast.error('데이터를 불러오지 못했습니다.')
@@ -53,16 +53,16 @@ export const useTodoModal = () => {
       setLoading(false)
     }
     fetchData()
-  }, [session, todolist.length, setTodosStore])
+  }, [user, todolist.length, setTodosStore])
 
   useEffect(() => {
     const fetchTodoWithMemoData = async () => {
-      if (!todoId || typeof todoId !== 'string' || !session?.user?.email) return
-      const todoWithMemo = await fetchTodoWithMemo(todoId, session.user.email)
+      if (!todoId || typeof todoId !== 'string' || !user?.email) return
+      const todoWithMemo = await fetchTodoWithMemo(todoId, user.email)
       setTodoMemo(todoWithMemo)
     }
     fetchTodoWithMemoData()
-  }, [todoId, session])
+  }, [todoId, user])
 
   useEffect(() => {
     if (!loading && !todo) router.replace('/todo')
@@ -74,9 +74,9 @@ export const useTodoModal = () => {
 
   useEffect(() => {
     const fetchConnectMemoData = async () => {
-      if (session && session.user && session.user.email) {
+      if (user && user.email) {
         try {
-          const memos = await fetchConnectMemo(session.user.email)
+          const memos = await fetchConnectMemo(user.email)
           setConnectMemos(memos)
         } catch {
           toast.error('메모 목록을 불러오지 못했습니다.')
@@ -84,7 +84,7 @@ export const useTodoModal = () => {
       }
     }
     fetchConnectMemoData()
-  }, [session])
+  }, [user])
 
   const NewConnectNull = () => {
     setNewConnectMemoContent('')
@@ -103,9 +103,9 @@ export const useTodoModal = () => {
   }, [router, unlock])
 
   const handleDeleteTodo = async (todoId: string) => {
-    if (!session?.user?.email) return
+    if (!user?.email) return
     try {
-      await deleteTodo(todoId, session.user.email)
+      await deleteTodo(todoId, user.email)
       setTodosStore(todolist.filter((todo) => todo.id !== todoId))
     } catch {
       toast.error('삭제에 실패했습니다.')
@@ -125,7 +125,7 @@ export const useTodoModal = () => {
   }
 
   const updateTodoInput = async () => {
-    if (!editTodo || !session?.user?.email) return
+    if (!editTodo || !user?.email) return
 
     const updatedDate = newDate === '' ? null : newDate
     const updatedTodoId = newMemoId === '' ? null : newMemoId
@@ -141,7 +141,7 @@ export const useTodoModal = () => {
       const updatedTodos = await updateTodo(
         editTodo.id,
         updatedTodo,
-        session.user.email
+        user.email
       )
 
       setTodosStore((prev) =>
@@ -153,7 +153,7 @@ export const useTodoModal = () => {
 
       const updatedTodoWithMemo = await fetchTodoWithMemo(
         editTodo.id,
-        session.user.email
+        user.email
       )
       setTodoMemo(updatedTodoWithMemo)
 

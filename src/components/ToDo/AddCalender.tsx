@@ -1,18 +1,17 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 import Button from '../Button'
+import { useAuth } from '@/context/AuthContext'
 
 export default function AddCalendar() {
-  const { data: session } = useSession()
+  const { user, authFetch , accessToken} = useAuth()
   const handleAddCalendar = useCallback(async () => {
-    if (!session?.accessToken) {
+    if (!user) {
       toast.error('로그인 세션이 만료되었습니다. 다시 로그인해 주세요.')
       return
     }
-    const accessToken = session.accessToken
     const uid = crypto.randomUUID()
     const calendarId = 'defaultCalendarId'
     const scheduleIcalString = [
@@ -48,12 +47,11 @@ export default function AddCalendar() {
     ].join('\n')
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `${process.env.NEXT_PUBLIC_API_URL}/naver/add-schedule`,
         {
           method: 'POST',
           headers: {
-            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -74,14 +72,14 @@ export default function AddCalendar() {
     } catch {
       toast.error('일정 추가 중 오류가 발생했습니다.')
     }
-  }, [session])
+  }, [accessToken])
 
   return (
     <Button
       type="button"
       onClick={handleAddCalendar}
-      className={`text-ui-sm my-4 py-4 w-full border border-gray-200 rounded-xl transition-colors ${session?.accessToken ? 'bg-secondary text-white hover:opacity-90' : 'bg-gray-200 text-gray-500'}`}
-      disabled={!session?.accessToken}
+      className={`text-ui-sm my-4 py-4 w-full border border-gray-200 rounded-xl transition-colors ${accessToken ? 'bg-secondary text-white hover:opacity-90' : 'bg-gray-200 text-gray-500'}`}
+      disabled={!accessToken}
     >
       내 네이버캘린더에 배포일 일정 추가
     </Button>

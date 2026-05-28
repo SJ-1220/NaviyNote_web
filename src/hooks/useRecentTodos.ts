@@ -1,15 +1,15 @@
+import { useAuth } from '@/context/AuthContext'
 import {
   fetchMainNextTodos,
   fetchMainPrevTodos,
   fetchMainTodayTodos,
   MainTodo,
 } from '@/lib/api/mainApi'
-import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 export const useRecentTodos = () => {
-  const { data: session } = useSession()
+  const {user}=useAuth()
   const [loading, setLoading] = useState<boolean>(true)
   const [todayTodos, setTodayTodos] = useState<MainTodo[]>([])
   const [nextTodos, setNextTodos] = useState<MainTodo[]>([])
@@ -17,11 +17,11 @@ export const useRecentTodos = () => {
 
   useEffect(() => {
     const fetchAllTodos = async () => {
-      if (!session?.user?.email) {
+      if (!user?.email) {
         setLoading(false)
         return
       }
-      const email = session.user.email
+      const email = user.email
       try {
         const [today, next, prev] = await Promise.all([
           fetchMainTodayTodos(email),
@@ -44,7 +44,7 @@ export const useRecentTodos = () => {
       }
     }
     fetchAllTodos()
-  }, [session])
+  }, [user])
 
   return {
     state: { loading, todayTodos, nextTodos, prevTodos },

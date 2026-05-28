@@ -1,18 +1,18 @@
+import { useAuth } from '@/context/AuthContext'
 import { fetchMainMemos, MainMemo } from '@/lib/api/mainApi'
-import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 export const useRecentMemos = () => {
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const [loading, setLoading] = useState<boolean>(true)
   const [recentMemos, setRecentMemos] = useState<MainMemo[]>([])
 
   useEffect(() => {
     const fetchRecentMemos = async () => {
-      if (session && session.user && session.user.email) {
+      if (user && user.email) {
         try {
-          const memos = await fetchMainMemos(session.user.email)
+          const memos = await fetchMainMemos(user.email)
           setRecentMemos(memos)
         } catch (err) {
           if (err instanceof TypeError) {
@@ -27,7 +27,7 @@ export const useRecentMemos = () => {
       setLoading(false)
     }
     fetchRecentMemos()
-  }, [session])
+  }, [user])
 
   return { state: { loading, recentMemos } }
 }

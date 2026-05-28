@@ -1,9 +1,9 @@
 'use client'
-import { signIn } from 'next-auth/react'
 import Image from 'next/image'
 import React, { useState } from 'react'
 import LogoImage from '../../../../public/images/logo-image.svg'
 import TitleWhiteImage from '../../../../public/images/title-white-image.svg'
+import { useRouter } from 'next/navigation'
 
 const features = [
   {
@@ -51,13 +51,10 @@ const steps = [
 ]
 
 function SignInButton({ className }: { className?: string }) {
-  const [authError, setAuthError] = useState<string | null>(null)
+  const router = useRouter();
 
   const handleSignIn = () => {
-    setAuthError(null)
-    signIn('naver').catch(() =>
-      setAuthError('로그인에 실패했습니다. 다시 시도해 주세요.')
-    )
+    router.push('http://localhost:8080/api/auth/naver');
   }
   return (
     <>
@@ -68,11 +65,6 @@ function SignInButton({ className }: { className?: string }) {
       >
         네이버로 로그인하기
       </button>
-      {authError && (
-        <p className="mt-3 text-white/80 font-nanumgothic_regular text-ui-caption">
-          {authError}
-        </p>
-      )}
     </>
   )
 }
@@ -93,7 +85,7 @@ export default function LandingPage() {
                 style={{ objectFit: 'contain' }}
               />
             </div>
-            <div className="relative w-[95%] aspect-[24/5] sm:w-96 sm:h-20 sm:aspect-auto">
+            <div className="relative w-[95%] aspect-24/5 sm:w-96 sm:h-20 sm:aspect-auto">
               <Image
                 src={TitleWhiteImage}
                 alt="NaviyNote"

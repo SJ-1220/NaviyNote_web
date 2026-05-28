@@ -7,15 +7,15 @@ import {
   fetchTodayTodo,
   fetchTodos,
 } from '@/lib/api/todoApi'
-import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import useTodoStore from '../store/todoStore'
 import { Memo } from '../types/memo'
 import { Todo } from '../types/todo'
+import { useAuth } from '@/context/AuthContext'
 
 export const useToDos = () => {
-  const { data: session } = useSession()
+  const { user }=useAuth()
   const { todolist, setTodosStore } = useTodoStore()
   const [todolistOpen, setTodolistOpen] = useState(false)
   const [loading, setLoading] = useState<boolean>(true)
@@ -37,9 +37,9 @@ export const useToDos = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (session && session.user && session.user.email) {
+      if (user && user.email) {
         try {
-          const todosData = await fetchTodos(session.user.email)
+          const todosData = await fetchTodos(user.email)
           setTodosStore(todosData)
         } catch (err) {
           if (err instanceof TypeError) {
@@ -54,11 +54,11 @@ export const useToDos = () => {
       setLoading(false)
     }
     fetchData()
-  }, [session, setTodosStore])
+  }, [user, setTodosStore])
 
   useEffect(() => {
     const handleFetchThreeDaysTodos = async () => {
-      if (session?.user?.email && selectedDate) {
+      if (user?.email && selectedDate) {
         try {
           const targetDate = new Date(selectedDate)
           const targetPrevDate = new Date(targetDate)
@@ -73,7 +73,7 @@ export const useToDos = () => {
           setSelectedNextDate(targetNextDateFormat)
 
           const todos = await fetchThreeDaysTodo(
-            session.user.email,
+            user.email,
             targetNextDateFormat,
             targetPrevDateFormat
           )
@@ -92,14 +92,14 @@ export const useToDos = () => {
       }
     }
     handleFetchThreeDaysTodos()
-  }, [session, selectedDate])
+  }, [user, selectedDate])
 
   useEffect(() => {
     const handleTodayTodos = async () => {
-      if (!session?.user?.email) return
+      if (!user?.email) return
       const today = todayDateFormat()
       try {
-        const todos = await fetchTodayTodo(session.user.email, today)
+        const todos = await fetchTodayTodo(user.email, today)
         setTodayTodos(todos)
       } catch (err) {
         if (err instanceof TypeError) {
@@ -112,13 +112,13 @@ export const useToDos = () => {
       }
     }
     handleTodayTodos()
-  }, [todolist, session])
+  }, [todolist, user])
 
   useEffect(() => {
     const handleNoDateTodos = async () => {
-      if (!session?.user?.email) return
+      if (!user?.email) return
       try {
-        const todos = await fetchNoDateTodo(session.user.email)
+        const todos = await fetchNoDateTodo(user.email)
         setNoDateTodos(todos)
       } catch (err) {
         if (err instanceof TypeError) {
@@ -131,13 +131,13 @@ export const useToDos = () => {
       }
     }
     handleNoDateTodos()
-  }, [todolist, session])
+  }, [todolist, user])
 
   useEffect(() => {
     const fetchConnectMemoData = async () => {
-      if (session && session.user && session.user.email) {
+      if (user && user.email) {
         try {
-          const memos = await fetchConnectMemo(session.user.email)
+          const memos = await fetchConnectMemo(user.email)
           setConnectMemos(memos)
         } catch (err) {
           if (err instanceof TypeError) {
@@ -151,7 +151,7 @@ export const useToDos = () => {
       }
     }
     fetchConnectMemoData()
-  }, [session])
+  }, [user])
 
   const MemoIDContent = (id: string, content: string) => {
     setNewMemoId(id)
@@ -160,9 +160,9 @@ export const useToDos = () => {
 
   const handleAddTodo = async () => {
     if (newTask.trim() === '') return
-    if (session && session.user && session.user.email) {
+    if (user && user.email) {
       const todo: Omit<Todo, 'id'> = {
-        user_email: session.user.email,
+        user_email: user.email,
         task: newTask,
         completed: newCompleted,
         important: newImportant,
@@ -171,7 +171,7 @@ export const useToDos = () => {
       }
       setIsSubmitting(true)
       try {
-        const result = await addTodo(todo, session.user.email)
+        const result = await addTodo(todo, user.email)
         if (result) {
           const { newTodo, todosUpdate } = result
           setTodosStore((prev) => {
@@ -215,7 +215,7 @@ export const useToDos = () => {
 
   return {
     state: {
-      session,
+      user,
       todolist,
       todolistOpen,
       loading,

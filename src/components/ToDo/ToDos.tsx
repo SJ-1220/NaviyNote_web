@@ -118,7 +118,7 @@ export default function ToDos() {
           {/* 선택 날짜 전후 3일 Todo */}
           <div className="mt-8 bg-white border border-gray-200 rounded-xl shadow-sm">
             <div className="p-6">
-              {(!state.selectedDate || !state.session?.user?.email) && (
+              {(!state.selectedDate || !state.user?.email) && (
                 <div>
                   <div className="text-ui-md text-center font-nanumgothic_bold text-primary">
                     캘린더에서 날짜를 선택하세요
@@ -128,7 +128,7 @@ export default function ToDos() {
                   </div>
                 </div>
               )}
-              {state.selectedDate && state.session?.user?.email && (
+              {state.selectedDate && state.user?.email && (
                 <div>
                   <div className="text-center text-ui-md font-nanumgothic_bold text-primary">
                     {state.selectedPrevDate} ~ {state.selectedNextDate}의 Todo

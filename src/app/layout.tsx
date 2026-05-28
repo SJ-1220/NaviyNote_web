@@ -3,10 +3,9 @@ import { HeaderWrapper } from '@/components/Header/HeaderClients'
 import GoogleAnalytics from '@/lib/GoogleAnalytics'
 import { Toaster } from 'sonner'
 import type { Metadata } from 'next'
-import { getServerSession } from 'next-auth'
 import localFont from 'next/font/local'
-import SessionWrapper from './api/auth/[...nextauth]/SessionWrapper'
 import './globals.css'
+import { AuthProvider } from '@/context/AuthContext'
 
 const NanumGothicRegular = localFont({
   src: '../../public/fonts/NanumGothic-Regular.ttf',
@@ -36,7 +35,6 @@ interface RootLayoutProps {
 }
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  const session = await getServerSession()
   return (
     <html
       lang="ko"
@@ -48,14 +46,12 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         ) : (
           <></>
         )}
-        <SessionWrapper session={session}>
+        <AuthProvider>
           <HeaderWrapper />
-        </SessionWrapper>
-        <SessionWrapper session={session}>
           <div className="flex justify-center bg-gray-50 overflow-x-hidden">
             <div className="w-full max-w-content px-4 sm:px-8">{children}</div>
           </div>
-        </SessionWrapper>
+        </AuthProvider>
         <Footer />
         <Toaster richColors position="top-center" />
       </body>

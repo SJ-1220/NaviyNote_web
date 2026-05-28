@@ -1,21 +1,21 @@
 import { fetchMainImportantTodos, MainTodo } from '@/lib/api/mainApi'
-import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import LoadingPage from '../Loading'
 import MainTodoBox from './MainTodoBox'
+import { useAuth } from '@/context/AuthContext'
 
 export default function MainImportant() {
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const [loading, setLoading] = useState<boolean>(true)
   const [importantTodos, setImportantTodos] = useState<MainTodo[]>([])
 
   useEffect(() => {
     const fetchImportantTodos = async () => {
-      if (session && session.user && session.user.email) {
+      if (user && user.email) {
         try {
-          const todos = await fetchMainImportantTodos(session.user.email)
+          const todos = await fetchMainImportantTodos(user.email)
           setImportantTodos(todos)
         } catch (err) {
           if (err instanceof TypeError) {
@@ -30,7 +30,7 @@ export default function MainImportant() {
       setLoading(false)
     }
     fetchImportantTodos()
-  }, [session])
+  }, [user])
 
   if (loading) return <LoadingPage />
 

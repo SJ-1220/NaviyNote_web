@@ -4,15 +4,15 @@ import {
   updateMemo,
 } from '@/lib/api/memoApi'
 import { fetchMonthTodo } from '@/lib/api/todoApi'
-import { useSession } from 'next-auth/react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import useMemoStore from '../store/memoStore'
 import { Memo } from '../types/memo'
 import { Todo } from '../types/todo'
+import { useAuth } from '@/context/AuthContext'
 
 export const useMemos = () => {
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const { memolist, setMemosStore } = useMemoStore()
   const [memolistOpen, setMemolistOpen] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -28,9 +28,9 @@ export const useMemos = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (session && session.user && session.user.email) {
+      if (user && user.email) {
         try {
-          const memosData = await fetchMemos(session.user.email)
+          const memosData = await fetchMemos(user.email)
           setMemosStore(memosData)
         } catch (err) {
           if (err instanceof TypeError) {
@@ -45,7 +45,7 @@ export const useMemos = () => {
       setLoading(false)
     }
     fetchData()
-  }, [session, setMemosStore])
+  }, [user, setMemosStore])
 
   useEffect(() => {
     const fetchMonthTodoData = async () => {
@@ -54,10 +54,10 @@ export const useMemos = () => {
       const month = Number(selectedMonth.split('-')[1]) - 1
       const start = new Date(year, month, 1)
       const end = new Date(year, month + 1, 0, 23, 59, 59)
-      if (session && session.user && session.user.email) {
+      if (user && user.email) {
         try {
           const monthTodos = await fetchMonthTodo(
-            session.user.email,
+            user.email,
             start.toISOString(),
             end.toISOString()
           )
@@ -74,7 +74,7 @@ export const useMemos = () => {
       }
     }
     fetchMonthTodoData()
-  }, [session, selectedMonth])
+  }, [user, selectedMonth])
 
   const MonthNull = () => {
     setSelectedMonth('')
@@ -84,9 +84,9 @@ export const useMemos = () => {
 
   const handleAddMemo = async () => {
     if (newContent.trim() === '') return
-    if (session && session.user && session.user.email) {
+    if (user && user.email) {
       const memo: Omit<Memo, 'id'> = {
-        user_email: session.user.email,
+        user_email: user.email,
         content: newContent,
         todo_id: newTodoId,
         active: newActive,
@@ -95,7 +95,7 @@ export const useMemos = () => {
       }
       setIsSubmitting(true)
       try {
-        const result = await addMemo(memo, session.user.email)
+        const result = await addMemo(memo, user.email)
         if (result) {
           const { newMemo, memosUpdate } = result
           setMemosStore((prev) => {
@@ -143,12 +143,12 @@ export const useMemos = () => {
       return memo
     })
     setMemosStore(updatedMemos)
-    if (session?.user?.email) {
+    if (user && user.email) {
       try {
         await updateMemo(
           id,
           { active: newActive, important: newImportant },
-          session.user.email
+          user.email
         )
       } catch (err) {
         if (err instanceof TypeError) {

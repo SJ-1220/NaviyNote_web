@@ -5,7 +5,6 @@ import {
   updateMemo,
 } from '@/lib/api/memoApi'
 import { fetchMonthTodo } from '@/lib/api/todoApi'
-import { useSession } from 'next-auth/react'
 import { useParams, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -13,10 +12,11 @@ import useMemoStore from '../store/memoStore'
 import { Memo, MemoWithTodo } from '../types/memo'
 import { Todo } from '../types/todo'
 import { useScrollLock } from './useScrollLock'
+import { useAuth } from '@/context/AuthContext'
 
 export const useMemoModal = () => {
   const { memoId } = useParams()
-  const { data: session } = useSession()
+  const { user }=useAuth()
   const router = useRouter()
   const unlock = useScrollLock()
   const memolist = useMemoStore((state) => state.memolist)
@@ -42,9 +42,9 @@ export const useMemoModal = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (memolist.length === 0 && session?.user?.email) {
+      if (memolist.length === 0 && user?.email) {
         try {
-          const fetchModalMemos = await fetchMemos(session.user.email)
+          const fetchModalMemos = await fetchMemos(user.email)
           setMemosStore(fetchModalMemos)
         } catch {
           toast.error('데이터를 불러오지 못했습니다.')
@@ -53,16 +53,16 @@ export const useMemoModal = () => {
       setLoading(false)
     }
     fetchData()
-  }, [session, memolist.length, setMemosStore])
+  }, [user, memolist.length, setMemosStore])
 
   useEffect(() => {
     const fetchMemoWithTodoData = async () => {
-      if (!memoId || typeof memoId !== 'string' || !session?.user?.email) return
-      const memoWithTodo = await fetchMemoWithTodo(memoId, session.user.email)
+      if (!memoId || typeof memoId !== 'string' || !user?.email) return
+      const memoWithTodo = await fetchMemoWithTodo(memoId, user.email)
       setMemoTodo(memoWithTodo)
     }
     fetchMemoWithTodoData()
-  }, [memoId, session])
+  }, [memoId, user])
 
   useEffect(() => {
     const fetchMonthTodoData = async () => {
@@ -71,10 +71,10 @@ export const useMemoModal = () => {
       const month = Number(newSelectedMonth.split('-')[1]) - 1
       const start = new Date(year, month, 1)
       const end = new Date(year, month + 1, 0, 23, 59, 59)
-      if (session && session.user && session.user.email) {
+      if (user && user.email) {
         try {
           const monthTodos = await fetchMonthTodo(
-            session.user.email,
+            user.email,
             start.toISOString(),
             end.toISOString()
           )
@@ -85,7 +85,7 @@ export const useMemoModal = () => {
       }
     }
     fetchMonthTodoData()
-  }, [session, newSelectedMonth])
+  }, [user, newSelectedMonth])
 
   useEffect(() => {
     if (!loading && !memo) router.replace('/memo')
@@ -108,9 +108,9 @@ export const useMemoModal = () => {
   }
 
   const handleDeleteMemo = async (memoId: string): Promise<void> => {
-    if (!session?.user?.email) return
+    if (!user?.email) return
     try {
-      await deleteMemo(memoId, session.user.email)
+      await deleteMemo(memoId, user.email)
       setMemosStore(memolist.filter((memo) => memo.id !== memoId))
     } catch {
       toast.error('삭제에 실패했습니다.')
@@ -135,7 +135,7 @@ export const useMemoModal = () => {
   }, [router, unlock])
 
   const updateMemoInput = async () => {
-    if (!editMemo || !session?.user?.email) return
+    if (!editMemo || !user?.email) return
 
     const updatedTodoId =
       newTodoId === 'null' || !newTodoId || newTodoId.trim() === ''
@@ -153,7 +153,7 @@ export const useMemoModal = () => {
       const updatedMemos = await updateMemo(
         editMemo.id,
         updatedMemo,
-        session.user.email
+        user.email
       )
 
       setMemosStore((prev) =>
@@ -165,7 +165,7 @@ export const useMemoModal = () => {
 
       const updatedMemoWithTodo = await fetchMemoWithTodo(
         editMemo.id,
-        session.user.email
+        user.email
       )
       setMemoTodo(updatedMemoWithTodo)
 
