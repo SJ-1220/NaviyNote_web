@@ -20,16 +20,18 @@ import { Todo, TodoWithMemo } from '@/types/todo'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL
 
-function base(path: string) {
-  return `${API_BASE}${path}`
+export function base(path: string) {
+  return `${API_BASE}/api${path}`
 }
 
-async function handleResponse<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    throw new Error(`API ${res.status}: ${text}`)
+type ApiResponse<T> = ({ success: true } & T) | { success: false; message: string };
+
+export async function handleResponse<T>(res: Response): Promise<T> {
+  const data=(await res.json()) as ApiResponse<T>
+  if (!data.success) {
+    throw new Error(data.message)
   }
-  return res.json() as Promise<T>
+  return data as T
 }
 
 // ── Read ─────────────────────────────────────────────────────────────

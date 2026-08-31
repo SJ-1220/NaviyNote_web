@@ -1,20 +1,24 @@
 export interface Todo {
-  id: string
-  user_email: string
-  task: string
-  completed: boolean
-  date: string | null
-  memo_id: string | null
-  important: boolean
+  id: string;
+  userId: string;
+  task: string;
+  completed: boolean;
+  date: string | null;
+  memoId: string | null;
+  important: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface TodoWithMemo {
-  id: string
-  user_email: string
-  task: string
-  completed: boolean
-  date: string | null
-  memo_id: string | null
-  important: boolean
-  memo?: { content: string }
+  id: string;
+  userId: string;
+  task: string;
+  completed: boolean;
+  date: string | null;
+  memoId: string | null;
+  important: boolean;
+  createdAt: string;
+  updatedAt: string;
+  memo?: { content: string };
 }
